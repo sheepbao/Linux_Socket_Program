@@ -12,7 +12,7 @@
 #include <unistd.h>
 #define Socket_File "/tmp/linux_socket"
 #define MAX_CLIENT 5
-#define BUFFER 1024
+#define BUFFER 1024*512
 
 int main(int argc, char const *argv[])
 {
@@ -41,7 +41,7 @@ int main(int argc, char const *argv[])
 	if (bind_sta == -1 )
 	{
 		perror("bind failed");
-		ublink(Socket_File);
+		unlink(Socket_File);
 		close(socketfd);
 		return 1;
 	}
@@ -51,7 +51,7 @@ int main(int argc, char const *argv[])
 	if(listen_sta == -1)
 	{
 		perror("can't listen");
-		ublink(Socket_File);
+		unlink(Socket_File);
 		close(socketfd);
 		return 1;
 	}
@@ -62,24 +62,34 @@ int main(int argc, char const *argv[])
 	if(accept_fd < 0 )
 	{
 		perror("can't acceptfd" );
-		ublink(Socket_File);
+		unlink(Socket_File);
 		close(socketfd);
 		return 1;
 	}
 
 	//read data or recv or recvmsg
 	char rec_data[BUFFER]={'\0'};
+	char file[BUFFER]={'\0'};
 	int len=1;
+	int filelen=0;
 	while (len != 0)
 	{
 		int read_sta=read(accept_fd , rec_data , sizeof(rec_data));
+		memcpy(file,rec_data,read_sta);
 		len=read_sta;
+		filelen+=read_sta;
+
 	}
-	printf("receive data from another program : %s\n",rec_data );
+	printf("receive data from another program " );
+
+	FILE *fw;
+	fw=fopen("rec.file","w");
+	fwrite(file,sizeof(char),filelen,fw);
+	fclose(fw);
 
 	
 	close(socketfd);
 	close(accept_fd);
-	ublink(Socket_File);
+	unlink(Socket_File);
 	return 0;
 }
