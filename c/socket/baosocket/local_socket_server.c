@@ -48,6 +48,7 @@ int main(int argc, char const *argv[])
 
 	//listen socket FD
 	int listen_sta=listen(socketfd , MAX_CLIENT);
+	printf("listen!\n");
 	if(listen_sta == -1)
 	{
 		perror("can't listen");
